@@ -3,13 +3,13 @@ package BackendSystem;
 import Request.RequestType;
 import Request.Request;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public class BankBackEndSystem {
 
-    private long bankBalance;
+    private final AtomicLong bankBalance = new AtomicLong();
 
-    public BankBackEndSystem(long bankBalance) {
-        this.bankBalance = bankBalance;
-    }
+
 
     public void processRequest(Request request, int idProcessor) {
         RequestType requestType = request.getRequestType();
@@ -25,10 +25,10 @@ public class BankBackEndSystem {
 
     }
 
-    private synchronized void decreaseBankBalance(Request request, int idProcessor) {
+    private  void decreaseBankBalance(Request request, int idProcessor) {
         int sum = request.getSum();
-        if (bankBalance >= sum) {
-            bankBalance -= sum;
+        if (bankBalance.get() >= sum) {
+            bankBalance.addAndGet(-sum);
             System.out.println("Бэк система: Заявка" + request + " УСПЕШНО ВЫПОЛНЕНА. Получена от обработчика заявок "
                     + idProcessor + ". Баланс банка:" + bankBalance);
 
@@ -39,10 +39,14 @@ public class BankBackEndSystem {
     }
 
 
-    private synchronized void increaseBankBalance(Request request, int idProcessor) {
-        bankBalance += request.getSum();
+    private  void increaseBankBalance(Request request, int idProcessor) {
+        bankBalance.addAndGet(request.getSum());
         System.out.println("Бэк система: Заявка" + request + " УСПЕШНО ВЫПОЛНЕНА. Получена от обработчика заявок "
                 + idProcessor + ". Баланс банка:" + bankBalance);
 
+    }
+
+    public  void updateBankBalance(int sum) {
+        bankBalance.addAndGet(sum);
     }
 }
